@@ -5,7 +5,9 @@
  */
 package webservices;
 
+import entities.Geolocation;
 import entities.Ticket;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Context;
@@ -101,12 +103,24 @@ public class TicketResource extends CarnetDeBordUtils {
     @Path("/longitude/{longitude: [0-9.]+}/latitude/{latitude: [0-9.]+}")
     @GET
     @Produces("application/json")
-    public String getJson(@PathParam(PATH_PARMAMETER_LONGITUDE) double longitude,
+    public Response getJson(@PathParam(PATH_PARMAMETER_LONGITUDE) double longitude,
             @PathParam(PATH_PARMAMETER_LATITUDE) double latitude) {
-
+        logger.info("request GET");
         logger.log(Level.INFO, "longitude : {0}, latitude : {1}", new Object[]{longitude, latitude});
 
-        return ("longitude : " + longitude + ", latitude : " + latitude);
+        Response.ResponseBuilder response = Response.ok();
+        ticketService = new TicketService();
+        List<Geolocation> geolocations = ticketService.getTicketsByGeolocation(longitude, latitude, true);
+        if (geolocations == null || geolocations.isEmpty()) {
+            response.status(Response.Status.NO_CONTENT);
+            return response.build();
+        }
+
+        Json<List<Geolocation>> json = new Json<>();
+        json.set(geolocations);
+
+        response.entity(json.generateJson());
+        return response.build();
     }
 
     /**

@@ -8,7 +8,7 @@ package utils;
 import entities.Geolocation;
 import entities.Ticket;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -59,13 +59,22 @@ public class CarnetDeBordUtils {
 
         public String generateJson() {
             if (data instanceof ArrayList) {
+                ArrayList<Object> temp = (ArrayList<Object>) data;
+                if (temp != null && !temp.isEmpty() && temp.get(0) instanceof Geolocation) {
+                    List<JSONObject> jsonList = new ArrayList<>();
+                    for (Object g : temp) {
+                        jsonList.add(fillJson((Geolocation) g));
+                    }
+                    return JSONValue.toJSONString(jsonList);
+                }
                 return JSONValue.toJSONString(data);
             } else if (data instanceof Ticket) {
                 Ticket t = (Ticket) data;
-                JSONObject json = fillJson(t);
+                JSONObject json = fillJson(t, true);
 
                 return json.toJSONString();
             }
+
             return null;
         }
 
@@ -77,7 +86,7 @@ public class CarnetDeBordUtils {
             return data;
         }
 
-        private JSONObject fillJson(Ticket t) {
+        private JSONObject fillJson(Ticket t, boolean addGeolocInfo) {
             JSONObject json = new JSONObject();
             json.put("ticketID", t.getId());
             json.put("annexInfo", t.getAnnexInfo());
@@ -87,13 +96,28 @@ public class CarnetDeBordUtils {
             json.put("state", t.getState());
             json.put("title", t.getTitle());
             json.put("type", t.getType());
-            for (Geolocation g : t.getGeolocationCollection()) {
-                json.put("geolocationID", g.getId());
-                json.put("latitude", g.getLatitude());
-                json.put("longitude", g.getLongitude());
-                json.put("address", g.getAddress());
-                break;
+            if (addGeolocInfo) {
+                for (Geolocation g : t.getGeolocationCollection()) {
+                    json.put("geolocationID", g.getId());
+                    json.put("latitude", g.getLatitude());
+                    json.put("longitude", g.getLongitude());
+                    json.put("address", g.getAddress());
+                    break;
+                }
             }
+
+            return json;
+        }
+
+        private JSONObject fillJson(Geolocation geolocation) {
+            JSONObject json = new JSONObject();
+            json.put("geolocationID", geolocation.getId());
+            json.put("latitude", geolocation.getLatitude());
+            json.put("longitude", geolocation.getLongitude());
+            json.put("address", geolocation.getAddress());
+            json.putAll(fillJson(geolocation.getTicketFK(), false));
+            json.put("userName", geolocation.getTicketFK().getUserFK().getName());
+            json.put("userFirstname", geolocation.getTicketFK().getUserFK().getFirstname());
 
             return json;
         }
