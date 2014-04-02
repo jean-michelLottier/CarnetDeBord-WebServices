@@ -3,13 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package session;
 
 import entities.Ticket;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 /**
  *
@@ -17,6 +18,7 @@ import javax.persistence.PersistenceContext;
  */
 @Stateless
 public class TicketFacade extends AbstractFacade<Ticket> implements TicketFacadeLocal {
+
     @PersistenceContext(unitName = "CarnetDeBordPU")
     private EntityManager em;
 
@@ -28,5 +30,46 @@ public class TicketFacade extends AbstractFacade<Ticket> implements TicketFacade
     public TicketFacade() {
         super(Ticket.class);
     }
-    
+
+    @Override
+    public Ticket findTicketByID(long ticketID) {
+        if (ticketID < 0) {
+            return null;
+        }
+
+        Query query = em.createNamedQuery("Ticket.findById")
+                .setParameter("id", ticketID);
+
+        Ticket ticket;
+        try {
+            ticket = (Ticket) query.getSingleResult();
+        } catch (NoResultException e) {
+            ticket = null;
+        }
+
+        return ticket;
+    }
+
+    @Override
+    public Ticket findTicketByID(long userID, long ticketID) {
+        if (userID < 0 || ticketID < 0) {
+            return null;
+        }
+
+        Query query = em.createQuery("SELECT t "
+                + "FROM Ticket t "
+                + "WHERE t.id = :ticketID AND t.userFK.id = :userID")
+                .setParameter("ticketID", ticketID)
+                .setParameter("userID", userID);
+
+        Ticket ticket;
+        try {
+            ticket = (Ticket) query.getSingleResult();
+        } catch (NoResultException e) {
+            ticket = null;
+        }
+
+        return ticket;
+    }
+
 }

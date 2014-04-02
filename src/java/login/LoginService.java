@@ -12,14 +12,15 @@ import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import session.UserFacadeLocal;
+import utils.CarnetDeBordUtils;
 
 /**
  *
  * @author Jean-Michel Lottier <jean-michel.lottier@cpe.fr>
  */
-public class LoginService implements ILoginService {
+public class LoginService extends CarnetDeBordUtils implements ILoginService {
 
-    public static final Logger logger = Logger.getLogger("LoginResource");
+    public static final Logger logger = Logger.getLogger(LoginService.class.getName());
 
     @EJB
     private UserFacadeLocal userFacade;
@@ -28,7 +29,7 @@ public class LoginService implements ILoginService {
         try {
             this.userFacade = (UserFacadeLocal) new InitialContext().lookup("java:module/UserFacade");
         } catch (NamingException ex) {
-            logger.log(Level.SEVERE, "Impossible to init UserFace object.", ex);
+            logger.log(Level.SEVERE, "Impossible to init UserFacade object.", ex);
         }
     }
 
@@ -37,7 +38,7 @@ public class LoginService implements ILoginService {
             try {
                 userFacade = (UserFacadeLocal) new InitialContext().lookup("java:module/UserFacade");
             } catch (NamingException ex) {
-                logger.log(Level.SEVERE, "Impossible to init UserFace object.", ex);
+                logger.log(Level.SEVERE, "Impossible to init UserFacade object.", ex);
             }
         }
         return userFacade;

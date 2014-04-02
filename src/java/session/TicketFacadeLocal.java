@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package session;
 
 import entities.Ticket;
@@ -30,5 +29,8 @@ public interface TicketFacadeLocal {
     List<Ticket> findRange(int[] range);
 
     int count();
-    
+
+    public Ticket findTicketByID(long ticketID);
+
+    public Ticket findTicketByID(long userID, long ticketID);
 }

@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utils.CarnetDeBordUtils;
 
 /**
  * REST Web Service
@@ -32,7 +33,7 @@ import org.json.simple.parser.ParseException;
  * @author Jean-Michel Lottier <jean-michel.lottier@cpe.fr>
  */
 @Path("login")
-public class LoginResource {
+public class LoginResource extends CarnetDeBordUtils {
 
     public static final Logger logger = Logger.getLogger(LoginResource.class.getName());
     private static final String PARAMETER_LOGIN = "login";
@@ -104,12 +105,12 @@ public class LoginResource {
         }
 
         loginService = new LoginService();
-        ILoginService.codeConnection connection = loginService.isLoginPasswordCorrect(login, password);
+        codeConnection connection = loginService.isLoginPasswordCorrect(login, password);
 
-        if (connection.equals(ILoginService.codeConnection.ERROR_LOGIN)
-                || connection.equals(ILoginService.codeConnection.ERROR_PASSWORD)) {
+        if (connection.equals(codeConnection.ERROR_LOGIN)
+                || connection.equals(codeConnection.ERROR_PASSWORD)) {
             response.status(Response.Status.UNAUTHORIZED);
-        } else if (connection.equals(ILoginService.codeConnection.ERROR_EMPTY_FIELD)) {
+        } else if (connection.equals(codeConnection.ERROR_EMPTY_FIELD)) {
             response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE);
         }
 
@@ -156,13 +157,13 @@ public class LoginResource {
         }
 
         loginService = new LoginService();
-        ILoginService.codeConnection connection = loginService.createNewUser(user);
+        codeConnection connection = loginService.createNewUser(user);
 
-        if (connection.equals(ILoginService.codeConnection.ERROR_REGISTER)) {
+        if (connection.equals(codeConnection.ERROR_REGISTER)) {
             logger.log(Level.SEVERE, "Impossible to register user's data into database");
             response.status(Response.Status.INTERNAL_SERVER_ERROR);
             return response.build();
-        } else if (connection.equals(ILoginService.codeConnection.ERROR_ACCOUNT_ALREADY_EXIST)) {
+        } else if (connection.equals(codeConnection.ERROR_ACCOUNT_ALREADY_EXIST)) {
             logger.log(Level.WARNING, "Account ''{0}'' already exist.", user.getLogin());
             response.status(Response.Status.CONFLICT);
             return response.build();

@@ -6,6 +6,7 @@
 package login;
 
 import entities.User;
+import utils.CarnetDeBordUtils;
 
 /**
  *
@@ -13,13 +14,23 @@ import entities.User;
  */
 public interface ILoginService {
 
-    public enum codeConnection {
+    /**
+     * <p>
+     * Determinate if the couple login/password is correct.</p>
+     *
+     * @param login
+     * @param password
+     * @return A specify code is returned according to the query result
+     */
+    public CarnetDeBordUtils.codeConnection isLoginPasswordCorrect(String login, String password);
 
-        ERROR_LOGIN, ERROR_PASSWORD, ERROR_EMPTY_FIELD, SUCCESS, ERROR_REGISTER, ERROR_ACCOUNT_ALREADY_EXIST;
-    };
-
-    public codeConnection isLoginPasswordCorrect(String login, String password);
-
-    public codeConnection createNewUser(User user);
+    /**
+     * <p>
+     * Create a new user into data table.</p>
+     *
+     * @param user
+     * @return
+     */
+    public CarnetDeBordUtils.codeConnection createNewUser(User user);
 
 }

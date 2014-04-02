@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package session;
 
 import entities.Geolocation;
@@ -30,5 +29,18 @@ public interface GeolocationFacadeLocal {
     List<Geolocation> findRange(int[] range);
 
     int count();
-    
+
+    /**
+     * <p>
+     * Find tickets around the user.</p>
+     *
+     * @param latitude
+     * @param longitude
+     * @param radius
+     * @param isAngularRadian
+     * @return
+     */
+    public List<Geolocation> findGeolocationIntoWorkingRadius(double latitude, double longitude, double radius, boolean isAngularRadian);
+
+    public Geolocation findGeolocationByTicketID(long ticketID);
 }
