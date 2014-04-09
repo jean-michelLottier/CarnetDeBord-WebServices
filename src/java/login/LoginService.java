@@ -7,19 +7,20 @@ package login;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import entities.User;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -134,15 +135,22 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
     private byte[] encryptContent(String content) {
         content = Base64.encode(content.getBytes());
 
-        KeyGenerator kg;
+//        KeyGenerator kg;
+//        try {
+//            kg = KeyGenerator.getInstance("AES");
+//        } catch (NoSuchAlgorithmException e) {
+//            logger.log(Level.SEVERE, "AES algorithm not supported", e);
+//            return null;
+//        }
+        Properties properties = new Properties();
         try {
-            kg = KeyGenerator.getInstance("AES");
-        } catch (NoSuchAlgorithmException e) {
-            logger.log(Level.SEVERE, "AES algorithm not supported", e);
-            return null;
+            properties.load(LoginService.class.getResourceAsStream("login.properties"));
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Impossible to load file 'login.properties'.", e);
         }
+        String strKey = properties.getProperty("key");
+        SecretKey key = new SecretKeySpec(Base64.decode(strKey), "AES");
 
-        Key key = kg.generateKey();
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -165,7 +173,16 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         return null;
     }
 
-    private byte[] decryptContent(byte[] content, SecretKey key) {
+    private byte[] decryptContent(byte[] content) {
+        Properties properties = new Properties();
+        try {
+            properties.load(LoginService.class.getResourceAsStream("login.properties"));
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Impossible to load file.", e);
+        }
+        String strKey = properties.getProperty("key");
+        SecretKey key = new SecretKeySpec(Base64.decode(strKey), "AES");
+
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, key);
