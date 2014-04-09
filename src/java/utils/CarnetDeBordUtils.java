@@ -7,6 +7,7 @@ package utils;
 
 import entities.Geolocation;
 import entities.Ticket;
+import entities.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -71,7 +72,10 @@ public class CarnetDeBordUtils {
             } else if (data instanceof Ticket) {
                 Ticket t = (Ticket) data;
                 JSONObject json = fillJson(t, true);
-
+                return json.toJSONString();
+            } else if (data instanceof User) {
+                User u = (User) data;
+                JSONObject json = fillJson(u);
                 return json.toJSONString();
             }
 
@@ -116,8 +120,21 @@ public class CarnetDeBordUtils {
             json.put("longitude", geolocation.getLongitude());
             json.put("address", geolocation.getAddress());
             json.putAll(fillJson(geolocation.getTicketFK(), false));
-            json.put("userName", geolocation.getTicketFK().getUserFK().getName());
-            json.put("userFirstname", geolocation.getTicketFK().getUserFK().getFirstname());
+            json.put("name", geolocation.getTicketFK().getUserFK().getName());
+            json.put("firstname", geolocation.getTicketFK().getUserFK().getFirstname());
+
+            return json;
+        }
+
+        private JSONObject fillJson(User user) {
+            JSONObject json = new JSONObject();
+            json.put("userID", user.getId());
+            json.put("birthDate", user.getBirthDate());
+            json.put("creationDate", user.getCreationDate());
+            json.put("firstName", user.getFirstname());
+            json.put("login", user.getLogin());
+            json.put("name", user.getName());
+            json.put("password", user.getPassword());
 
             return json;
         }

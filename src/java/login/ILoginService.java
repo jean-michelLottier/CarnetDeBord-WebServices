@@ -33,4 +33,7 @@ public interface ILoginService {
      */
     public CarnetDeBordUtils.codeConnection createNewUser(User user);
 
+    public User getUserInformation(String login);
+
+    public void generatePassword(String login) throws IllegalArgumentException;
 }

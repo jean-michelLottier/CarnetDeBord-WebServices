@@ -114,6 +114,11 @@ public class LoginResource extends CarnetDeBordUtils {
             response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE);
         }
 
+        User user = loginService.getUserInformation(login);
+        Json<User> json = new Json<>();
+        json.set(user);
+
+        response.entity(json.generateJson());
         return response.build();
     }
 
@@ -169,6 +174,11 @@ public class LoginResource extends CarnetDeBordUtils {
             return response.build();
         }
 
+        user = loginService.getUserInformation(user.getLogin());
+        Json<User> j = new Json<>();
+        j.set(user);
+
+        response.entity(j.generateJson());
         return response.build();
     }
 }

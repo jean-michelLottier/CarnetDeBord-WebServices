@@ -5,9 +5,21 @@
  */
 package login;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import entities.User;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -82,4 +94,100 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         return codeConnection.SUCCESS;
     }
 
+    @Override
+    public User getUserInformation(String login) {
+        if (login == null || login.isEmpty()) {
+            return null;
+        }
+
+        return userFacade.findUserByLogin(login);
+    }
+
+    @Override
+    public void generatePassword(String login) throws IllegalArgumentException {
+        if (login == null || login.isEmpty()) {
+            throw new IllegalArgumentException("Impossible to generate password without login");
+        }
+
+        User user = getUserInformation(login);
+
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; ++i) {
+            int ascii = 48 + random.nextInt(47);
+            String c = String.valueOf((char) ascii);
+            sb.append(random.nextInt(2) == 0 ? c.toLowerCase() : c);
+        }
+
+        String newPassword;
+        try {
+            newPassword = new String(encryptContent(sb.toString()), "UTF8");
+        } catch (UnsupportedEncodingException e) {
+            logger.log(Level.SEVERE, "Bad encoding", e);
+            newPassword = sb.toString();
+        }
+        user.setPassword(newPassword);
+
+        userFacade.edit(user);
+    }
+
+    private byte[] encryptContent(String content) {
+        content = Base64.encode(content.getBytes());
+
+        KeyGenerator kg;
+        try {
+            kg = KeyGenerator.getInstance("AES");
+        } catch (NoSuchAlgorithmException e) {
+            logger.log(Level.SEVERE, "AES algorithm not supported", e);
+            return null;
+        }
+
+        Key key = kg.generateKey();
+        try {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+
+            return cipher.doFinal(content.getBytes("UTF8"));
+        } catch (NoSuchPaddingException e) {
+            logger.log(Level.SEVERE, "padding problem", e);
+        } catch (NoSuchAlgorithmException e) {
+            logger.log(Level.SEVERE, "algorithm problem", e);
+        } catch (InvalidKeyException e) {
+            logger.log(Level.SEVERE, "key invalid", e);
+        } catch (BadPaddingException e) {
+            logger.log(Level.SEVERE, "bad padding", e);
+        } catch (IllegalBlockSizeException e) {
+            logger.log(Level.SEVERE, "illegal block size", e);
+        } catch (UnsupportedEncodingException e) {
+            logger.log(Level.SEVERE, "Bad encoding", e);
+        }
+
+        return null;
+    }
+
+    private byte[] decryptContent(byte[] content, SecretKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+
+            content = cipher.doFinal(content);
+            content = Base64.decode(new String(content, "UTF8"));
+
+            return content;
+        } catch (NoSuchPaddingException e) {
+            logger.log(Level.SEVERE, "padding problem", e);
+        } catch (NoSuchAlgorithmException e) {
+            logger.log(Level.SEVERE, "algorithm problem", e);
+        } catch (InvalidKeyException e) {
+            logger.log(Level.SEVERE, "key invalid", e);
+        } catch (BadPaddingException e) {
+            logger.log(Level.SEVERE, "bad padding", e);
+        } catch (IllegalBlockSizeException e) {
+            logger.log(Level.SEVERE, "illegal block size", e);
+        } catch (UnsupportedEncodingException e) {
+            logger.log(Level.SEVERE, "Bad encoding", e);
+        }
+
+        return null;
+    }
 }
