@@ -41,7 +41,7 @@ import javax.ws.rs.PathParam;
  */
 @Path("login")
 public class LoginResource extends CarnetDeBordUtils {
-
+    
     public static final Logger logger = Logger.getLogger(LoginResource.class.getName());
     private static final String PARAMETER_LOGIN = "login";
     private static final String PARAMETER_PASSWORD = "password";
@@ -49,17 +49,17 @@ public class LoginResource extends CarnetDeBordUtils {
     private static final String PARAMETER_FIRSTNAME = "firstname";
     private static final String PARAMETER_BIRTHDATE = "birthdate";
     private static final String PATH_PARAMETER_TOKEN_ID = "tokenid";
-
+    
     @Context
     private UriInfo context;
-
+    
     private ILoginService loginService;
     private IEmailService emailService;
-
+    
     public ILoginService getLoginService() {
         return loginService;
     }
-
+    
     public void setLoginService(ILoginService loginService) {
         this.loginService = loginService;
     }
@@ -81,13 +81,13 @@ public class LoginResource extends CarnetDeBordUtils {
     @Produces("application/json")
     public Response getJson(@PathParam(PATH_PARAMETER_TOKEN_ID) String tokenID) {
         logger.info("request GET");
-
+        
         logger.log(Level.INFO, "tokenID : {0}", tokenID);
-
+        
         Response.ResponseBuilder response = Response.ok();
-        try{
+        try {
             return Response.temporaryRedirect(new URI("../../../../confirmation-inscription.html")).build();
-        }catch(URISyntaxException e){
+        } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "uri no available", e);
         }
         return response.build();
@@ -108,7 +108,7 @@ public class LoginResource extends CarnetDeBordUtils {
             response.status(Response.Status.BAD_REQUEST);
             return response.build();
         }
-
+        
         String login, password;
         try {
             JSONObject json = (JSONObject) new JSONParser().parse(content);
@@ -119,21 +119,22 @@ public class LoginResource extends CarnetDeBordUtils {
             response.status(Response.Status.INTERNAL_SERVER_ERROR);
             return response.build();
         }
-
+        
         loginService = new LoginService();
         codeConnection connection = loginService.isLoginPasswordCorrect(login, password);
-
+        
         if (connection.equals(codeConnection.ERROR_LOGIN)
-                || connection.equals(codeConnection.ERROR_PASSWORD)) {
+                || connection.equals(codeConnection.ERROR_PASSWORD)
+                || connection.equals(codeConnection.ERROR_ACCOUNT_NOT_ACTIVATED)) {
             response.status(Response.Status.UNAUTHORIZED);
         } else if (connection.equals(codeConnection.ERROR_EMPTY_FIELD)) {
             response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE);
         }
-
+        
         User user = loginService.getUserInformation(login);
         Json<User> json = new Json<>();
         json.set(user);
-
+        
         response.entity(json.generateJson());
         return response.build();
     }
@@ -154,7 +155,7 @@ public class LoginResource extends CarnetDeBordUtils {
             response.status(Response.Status.BAD_REQUEST);
             return response.build();
         }
-
+        
         User user = new User();
         try {
             JSONObject json = (JSONObject) new JSONParser().parse(content);
@@ -176,10 +177,10 @@ public class LoginResource extends CarnetDeBordUtils {
             response.status(Response.Status.INTERNAL_SERVER_ERROR);
             return response.build();
         }
-
+        
         loginService = new LoginService();
         codeConnection connection = loginService.createNewUser(user);
-
+        
         if (connection.equals(codeConnection.ERROR_REGISTER)) {
             logger.log(Level.SEVERE, "Impossible to register user's data into database");
             response.status(Response.Status.INTERNAL_SERVER_ERROR);
@@ -189,15 +190,15 @@ public class LoginResource extends CarnetDeBordUtils {
             response.status(Response.Status.CONFLICT);
             return response.build();
         }
-
+        
         user = loginService.getUserInformation(user.getLogin());
         Json<User> j = new Json<>();
         j.set(user);
-
+        
         String token = Base64.encode(user.getLogin().getBytes(Charset.defaultCharset()));
         emailService = new EmailService();
         emailService.sendConfirmationEmailWithGmail(token, user.getLogin());
-
+        
         response.entity(j.generateJson());
         return response.build();
     }

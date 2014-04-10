@@ -76,6 +76,10 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         if (!user.getPassword().equals(password)) {
             return codeConnection.ERROR_PASSWORD;
         }
+        
+        if(!user.getActivation()){
+            return codeConnection.ERROR_ACCOUNT_NOT_ACTIVATED;
+        }
 
         return codeConnection.SUCCESS;
     }

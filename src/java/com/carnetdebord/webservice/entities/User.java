@@ -42,7 +42,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password"),
     @NamedQuery(name = "User.findByName", query = "SELECT u FROM User u WHERE u.name = :name"),
     @NamedQuery(name = "User.findByFirstname", query = "SELECT u FROM User u WHERE u.firstname = :firstname"),
-    @NamedQuery(name = "User.findByBirthDate", query = "SELECT u FROM User u WHERE u.birthDate = :birthDate")})
+    @NamedQuery(name = "User.findByBirthDate", query = "SELECT u FROM User u WHERE u.birthDate = :birthDate"),
+    @NamedQuery(name = "User.findByActivation", query = "SELECT u FROM User u WHERE u.activation = :activation")})
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -78,6 +79,10 @@ public class User implements Serializable {
     @Column(name = "BirthDate")
     @Temporal(TemporalType.DATE)
     private Date birthDate;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "Activation")
+    private boolean activation;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userFK")
     private Collection<Ticket> ticketCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userFK")
@@ -90,13 +95,14 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    public User(Integer id, Date creationDate, String login, String password, String name, String firstname) {
+    public User(Integer id, Date creationDate, String login, String password, String name, String firstname, boolean activation) {
         this.id = id;
         this.creationDate = creationDate;
         this.login = login;
         this.password = password;
         this.name = name;
         this.firstname = firstname;
+        this.activation = activation;
     }
 
     public Integer getId() {
@@ -155,13 +161,12 @@ public class User implements Serializable {
         this.birthDate = birthDate;
     }
 
-    @XmlTransient
-    public Collection<Ticket> getTicketCollection() {
-        return ticketCollection;
+    public boolean getActivation() {
+        return activation;
     }
 
-    public void setTicketCollection(Collection<Ticket> ticketCollection) {
-        this.ticketCollection = ticketCollection;
+    public void setActivation(boolean activation) {
+        this.activation = activation;
     }
 
     @XmlTransient
@@ -195,7 +200,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "entities.User[ id=" + id + " ]";
+        return "com.carnetdebord.webservice.entities.User[ id=" + id + " ]";
     }
     
 }
