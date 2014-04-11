@@ -30,6 +30,13 @@ public interface UserFacadeLocal {
 
     public int count();
 
+    /**
+     * <p>
+     * Find user by login.</p>
+     *
+     * @param login
+     * @return User if this one found otherwise null.
+     */
     public User findUserByLogin(String login);
 
     public List<User> findUserByName(String name);

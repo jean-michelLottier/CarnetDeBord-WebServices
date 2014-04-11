@@ -5,6 +5,8 @@
  */
 package com.carnetdebord.webservice.login;
 
+import com.carnetdebord.webservice.email.EmailService;
+import com.carnetdebord.webservice.email.IEmailService;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.carnetdebord.webservice.entities.User;
 import java.io.IOException;
@@ -34,6 +36,8 @@ import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
 public class LoginService extends CarnetDeBordUtils implements ILoginService {
 
     public static final Logger logger = Logger.getLogger(LoginService.class.getName());
+
+    private IEmailService emailService;
 
     @EJB
     private UserFacadeLocal userFacade;
@@ -99,6 +103,13 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         return codeConnection.SUCCESS;
     }
 
+    /**
+     * <p>
+     * Get information about user.</p>
+     *
+     * @param login
+     * @return User if this one exists otherwise null
+     */
     @Override
     public User getUserInformation(String login) {
         if (login == null || login.isEmpty()) {
@@ -109,12 +120,15 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
     }
 
     @Override
-    public void generatePassword(String login) throws IllegalArgumentException {
+    public codeConnection generatePassword(String login) throws IllegalArgumentException {
         if (login == null || login.isEmpty()) {
             throw new IllegalArgumentException("Impossible to generate password without login");
         }
 
         User user = getUserInformation(login);
+        if (user == null) {
+            return codeConnection.ERROR_LOGIN;
+        }
 
         Random random = new Random();
         StringBuilder sb = new StringBuilder();
@@ -123,7 +137,7 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
             String c = String.valueOf((char) ascii);
             sb.append(random.nextInt(2) == 0 ? c.toLowerCase() : c);
         }
-
+        logger.log(Level.INFO, "old password : {0}", user.getPassword());
         String newPassword;
         try {
             newPassword = new String(encryptContent(sb.toString()), "UTF8");
@@ -131,9 +145,15 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
             logger.log(Level.SEVERE, "Bad encoding", e);
             newPassword = sb.toString();
         }
+        logger.log(Level.INFO, "new password : {0}", newPassword);
         user.setPassword(newPassword);
 
         userFacade.edit(user);
+
+        emailService = new EmailService();
+        emailService.sendForgotPassordEmailWithGmail(user, sb.toString());
+        
+        return codeConnection.SUCCESS;
     }
 
     @Override

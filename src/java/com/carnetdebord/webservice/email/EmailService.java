@@ -35,8 +35,25 @@ public class EmailService implements IEmailService {
     private static final String EMAIL_CONTENT_CONFIRMATION_INSCRIPTION = "<h1 style=\"color:blue;text-align:center;\">Horizon - Carnet de bord</h1>"
             + "<br/><p>Bienvenue sur <strong>Carnet de bord</strong> nouvel horizon!"
             + "<br/>Vous pouvez vous connecter à votre compte une fois que vous l'aurez activé. Pour cela, veuillez activer celui-ci en cliquant sur le lien suivant : <a href=\"http://localhost:8080/CarnetDeBord/webresources/login/token/tokenid/\" style=\"color:blue;text-decoration:none;\">activer mon compte carnet de bord</a>."
-            + "<br/><br/>Cordialement,</p></p>"
-            + "<br/><br/><p>L'équipe <strong>Horizon - Carnet de bord</strong></p>";
+            + "<br/><br/>Cordialement,</p>"
+            + "<br/><br/><p>Votre équipe <strong>Horizon - Carnet de bord</strong></p>";
+    
+    private static final String EMAIL_SUBJECT_FORGOT_PASSWORD = "Demande de nouveau mot de passe";
+    private static final String EMAIL_CONTENT_FORGOT_PASSWORD = "<h1 style=\"color:blue;text-align:center;\">Horizon - Carnet de bord</h1>\n"
+            + "<p>Bonjour token_firstname,\n"
+            + "    <br/><br/>\n"
+            + "    Suite à votre demande de nouveau mot de passe, vous trouverez ci-dessous votre nouveau mot de passe : \n"
+            + "    <br/>\n"
+            + "    <div style=\"text-align:center;\"><strong >token_password</strong></div>\n"
+            + "</p>\n"
+            + "<p>Si vous avez reçu cet email de manière inattendue et que vous connaissez toujours votre mot de passe, merci de nous contacter par email à l'adresse suivante : \n"
+            + "    <address>\n"
+            + "        <a href=\"mailto:horizon.carnetdebord@gmail.com\">horizon.carnetdebord@gmail.com</a>\n"
+            + "    </address>\n"
+            + "    <br/>\n"
+            + "    Cordialement,\n"
+            + "</p>\n"
+            + "<br/><br/><p>Votre équipe <strong>Horizon - Carnet de bord</strong></p>";
     
     @EJB
     private EmailFacadeLocal emailFacade;
@@ -82,14 +99,7 @@ public class EmailService implements IEmailService {
 //                return new PasswordAuthentication(from1, password1);
 //            }
 //        });
-        InitialContext ctx = null;
-        Session session = null;
-        try {
-            ctx = new InitialContext();
-            session = (Session) ctx.lookup("mail/carnetdebord");
-        } catch (NamingException ex) {
-            Logger.getLogger(EmailService.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Session session = initSession();
         
         Message message = new MimeMessage(session);
         StringBuilder sbAddresses = new StringBuilder();
@@ -126,4 +136,43 @@ public class EmailService implements IEmailService {
         }
     }
     
+    @Override
+    public void sendForgotPassordEmailWithGmail(User user, String password) {
+        if (password == null || password.isEmpty()) {
+            logger.log(Level.WARNING, "No password found.");
+            return;
+        }
+        
+        Session session = initSession();
+        Message message = new MimeMessage(session);
+        String messageHtml = null;
+        try {
+            message.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getLogin()));
+            message.setSubject(EMAIL_SUBJECT_FORGOT_PASSWORD);
+            messageHtml = EMAIL_CONTENT_FORGOT_PASSWORD
+                    .replace("token_firstname", user.getFirstname())
+                    .replace("token_password", password);
+            message.setContent(messageHtml, "text/html");
+            
+            Transport.send(message);
+        } catch (MessagingException ex) {
+            logger.log(Level.WARNING, "mail not sent", ex);
+        }
+        
+        Email email = new Email(0, new Date(), password, user.getLogin(), EMAIL_SUBJECT_FORGOT_PASSWORD, StringEscapeUtils.escapeXml(messageHtml));
+        email.setUserFK(user);
+        emailFacade.create(email);
+    }
+    
+    private Session initSession() {
+        Session session = null;
+        try {
+            InitialContext ctx = new InitialContext();
+            session = (Session) ctx.lookup("mail/carnetdebord");
+        } catch (NamingException ex) {
+            Logger.getLogger(EmailService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return session;
+    }
 }

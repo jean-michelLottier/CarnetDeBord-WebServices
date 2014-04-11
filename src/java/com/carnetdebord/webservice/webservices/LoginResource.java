@@ -71,7 +71,8 @@ public class LoginResource extends CarnetDeBordUtils {
     }
 
     /**
-     * Retrieves representation of an instance of webservices.LoginResource
+     * <p>
+     * <strong>GET</strong> request to activate account.</p>
      *
      * @param tokenID
      * @return an instance of java.lang.String
@@ -102,6 +103,31 @@ public class LoginResource extends CarnetDeBordUtils {
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "uri no available", e);
         }
+        return response.build();
+    }
+
+    /**
+     * <p>
+     * <strong>GET</strong> request to generate new password when you forgot
+     * this one.</p>
+     *
+     * @param login
+     * @return
+     */
+    @Path("/{login: ([a-zA-Z0-9.-]+)(@)([a-z]+)(\\.)([a-z]{2,3})}")
+    @GET
+    @Produces("application/json")
+    public Response getJson2(@PathParam(PARAMETER_LOGIN) String login) {
+        Response.ResponseBuilder response = Response.ok();
+
+        logger.log(Level.INFO, "login : {0}", login);
+
+        loginService = new LoginService();
+        codeConnection connection = loginService.generatePassword(login);
+        if (connection.equals(codeConnection.ERROR_LOGIN)) {
+            response.status(Response.Status.BAD_REQUEST);
+        }
+
         return response.build();
     }
 

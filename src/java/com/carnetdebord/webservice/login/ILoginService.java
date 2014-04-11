@@ -35,7 +35,22 @@ public interface ILoginService {
 
     public User getUserInformation(String login);
 
-    public void generatePassword(String login) throws IllegalArgumentException;
-    
+    /**
+     * <p>
+     * Method to generate a password encrypted and with size : 8.</p>
+     *
+     * @param login
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public CarnetDeBordUtils.codeConnection generatePassword(String login) throws IllegalArgumentException;
+
+    /**
+     * <p>
+     * Method to activate account.</p>
+     *
+     * @param token = login
+     * @return
+     */
     public CarnetDeBordUtils.codeConnection activateAccount(String token);
 }

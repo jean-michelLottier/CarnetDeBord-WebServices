@@ -14,7 +14,32 @@ import com.carnetdebord.webservice.entities.User;
  */
 public interface IEmailService {
 
+    /**
+     * * <p>
+     * Send email to notify user that his account has been created
+     * successfuly.</p>
+     *
+     * @param token
+     * @param to
+     * @return
+     */
     public Email sendConfirmationEmailWithGmail(String token, String... to);
-    
+
+    /**
+     * {@link #sendConfirmationEmailWithGmail(java.lang.String, java.lang.String...)
+     * }
+     *
+     * @param token
+     * @param user
+     */
     public void sendConfirmationEmailWithGmail(String token, User user);
+
+    /**
+     * <p>
+     * Send email at the user to notify this password has been renewed.</p>
+     *
+     * @param user
+     * @param password
+     */
+    public void sendForgotPassordEmailWithGmail(User user, String password);
 }
