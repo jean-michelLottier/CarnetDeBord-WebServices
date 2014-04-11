@@ -45,6 +45,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "User.findByBirthDate", query = "SELECT u FROM User u WHERE u.birthDate = :birthDate"),
     @NamedQuery(name = "User.findByActivation", query = "SELECT u FROM User u WHERE u.activation = :activation")})
 public class User implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userFK")
+    private Collection<Email> emailCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -201,6 +203,15 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "com.carnetdebord.webservice.entities.User[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    public Collection<Email> getEmailCollection() {
+        return emailCollection;
+    }
+
+    public void setEmailCollection(Collection<Email> emailCollection) {
+        this.emailCollection = emailCollection;
     }
     
 }

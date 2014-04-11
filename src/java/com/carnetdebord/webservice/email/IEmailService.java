@@ -5,11 +5,16 @@
  */
 package com.carnetdebord.webservice.email;
 
+import com.carnetdebord.webservice.entities.Email;
+import com.carnetdebord.webservice.entities.User;
+
 /**
  *
  * @author Jean-Michel Lottier <jean-michel.lottier@cpe.fr>
  */
 public interface IEmailService {
 
-    public void sendConfirmationEmailWithGmail(String token, String... to);
+    public Email sendConfirmationEmailWithGmail(String token, String... to);
+    
+    public void sendConfirmationEmailWithGmail(String token, User user);
 }

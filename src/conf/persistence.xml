@@ -6,6 +6,7 @@
     <class>com.carnetdebord.webservice.entities.Historical</class>
     <class>com.carnetdebord.webservice.entities.Ticket</class>
     <class>com.carnetdebord.webservice.entities.User</class>
+    <class>com.carnetdebord.webservice.entities.Email</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties/>
   </persistence-unit>

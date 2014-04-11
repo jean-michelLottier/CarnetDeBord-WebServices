@@ -197,7 +197,7 @@ public class LoginResource extends CarnetDeBordUtils {
         
         String token = Base64.encode(user.getLogin().getBytes(Charset.defaultCharset()));
         emailService = new EmailService();
-        emailService.sendConfirmationEmailWithGmail(token, user.getLogin());
+        emailService.sendConfirmationEmailWithGmail(token, user);
         
         response.entity(j.generateJson());
         return response.build();
