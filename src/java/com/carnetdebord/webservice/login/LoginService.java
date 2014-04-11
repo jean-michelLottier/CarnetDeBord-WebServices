@@ -76,8 +76,8 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         if (!user.getPassword().equals(password)) {
             return codeConnection.ERROR_PASSWORD;
         }
-        
-        if(!user.getActivation()){
+
+        if (!user.getActivation()) {
             return codeConnection.ERROR_ACCOUNT_NOT_ACTIVATED;
         }
 
@@ -134,6 +134,19 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         user.setPassword(newPassword);
 
         userFacade.edit(user);
+    }
+
+    @Override
+    public codeConnection activateAccount(String token) {
+        User user = userFacade.findUserByLogin(token);
+        if (user == null) {
+            return codeConnection.ERROR_LOGIN;
+        }
+
+        user.setActivation(true);
+        userFacade.edit(user);
+
+        return codeConnection.SUCCESS;
     }
 
     private byte[] encryptContent(String content) {
