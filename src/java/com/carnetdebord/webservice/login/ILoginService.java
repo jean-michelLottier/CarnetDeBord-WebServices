@@ -53,4 +53,6 @@ public interface ILoginService {
      * @return
      */
     public CarnetDeBordUtils.codeConnection activateAccount(String token);
+    
+    public User findUserById(long id);
 }

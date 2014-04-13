@@ -49,4 +49,6 @@ public interface ITicketService {
      * @return
      */
     public List<Geolocation> getTicketsByGeolocation(double longitude, double latitude, boolean isAngularRadian, WorkingRadius... workingRadiuses);
+
+    public void saveTicket(Ticket ticket);
 }

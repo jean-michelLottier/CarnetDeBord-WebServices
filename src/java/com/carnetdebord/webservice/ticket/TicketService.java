@@ -97,4 +97,13 @@ public class TicketService extends CarnetDeBordUtils implements ITicketService {
         List<Geolocation> geolocations = geolocationFacade.findGeolocationIntoWorkingRadius(latitude, longitude, radius, isAngularRadian);
         return geolocations;
     }
+
+    @Override
+    public void saveTicket(Ticket ticket) {
+        if(ticket == null){
+            return;
+        }
+        
+        ticketFacade.create(ticket);
+    }
 }

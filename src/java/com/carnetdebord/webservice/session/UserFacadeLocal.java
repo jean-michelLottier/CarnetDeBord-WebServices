@@ -40,4 +40,6 @@ public interface UserFacadeLocal {
     public User findUserByLogin(String login);
 
     public List<User> findUserByName(String name);
+
+    public User findUserByID(long id);
 }

@@ -55,4 +55,23 @@ public class UserFacade extends AbstractFacade<User> implements UserFacadeLocal 
         return users;
     }
 
+    @Override
+    public User findUserByID(long id) {
+        if (id < 0) {
+            return null;
+        }
+
+        Query query = em.createNamedQuery("User.findById")
+                .setParameter("id", id);
+
+        User user;
+        try {
+            user = (User) query.getSingleResult();
+        } catch (NoResultException e) {
+            user = null;
+        }
+
+        return user;
+    }
+
 }

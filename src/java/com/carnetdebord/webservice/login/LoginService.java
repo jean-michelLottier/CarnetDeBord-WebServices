@@ -121,12 +121,14 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
 
     @Override
     public codeConnection generatePassword(String login) throws IllegalArgumentException {
+        logger.info("method generatePassword");
         if (login == null || login.isEmpty()) {
             throw new IllegalArgumentException("Impossible to generate password without login");
         }
 
         User user = getUserInformation(login);
         if (user == null) {
+            logger.info("user null");
             return codeConnection.ERROR_LOGIN;
         }
 
@@ -148,8 +150,10 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         logger.log(Level.INFO, "new password : {0}", newPassword);
         user.setPassword(newPassword);
 
+        logger.info("Edit user");
         userFacade.edit(user);
 
+        logger.info("Send email");
         emailService = new EmailService();
         emailService.sendForgotPassordEmailWithGmail(user, sb.toString());
         
@@ -243,5 +247,14 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         }
 
         return null;
+    }
+
+    @Override
+    public User findUserById(long id) {
+        if(id < 0){
+            return null;
+        }
+        
+        return userFacade.findUserByID(id);
     }
 }

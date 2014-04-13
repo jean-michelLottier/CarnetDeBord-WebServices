@@ -7,6 +7,9 @@ package com.carnetdebord.webservice.webservices;
 
 import com.carnetdebord.webservice.entities.Geolocation;
 import com.carnetdebord.webservice.entities.Ticket;
+import com.carnetdebord.webservice.entities.User;
+import com.carnetdebord.webservice.login.ILoginService;
+import com.carnetdebord.webservice.login.LoginService;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,6 +25,13 @@ import javax.ws.rs.core.Response;
 import com.carnetdebord.webservice.ticket.ITicketService;
 import com.carnetdebord.webservice.ticket.TicketService;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
+import static com.carnetdebord.webservice.webservices.LoginResource.logger;
+import java.util.Date;
+import javax.ws.rs.POST;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * REST Web Service
@@ -38,11 +48,20 @@ public class TicketResource extends CarnetDeBordUtils {
     private static final String PATH_PARMAMETER_USER_ID = "userid";
     private static final String PATH_PARMAMETER_LONGITUDE = "longitude";
     private static final String PATH_PARMAMETER_LATITUDE = "latitude";
+    
+    private static final String PARAMETER_TICKET_ID = "ticketid";
+    private static final String PARAMETER_USER_ID = "userid";
+    private static final String PARAMETER_TITLE = "title";
+    private static final String PARAMETER_MESSAGE = "message";
+    private static final String PARAMETER_TYPE = "type";
+    private static final String PARAMETER_ANNEX_INFO = "annexinfo";
+    private static final String PARAMETER_STATE = "state";
 
     @Context
     private UriInfo context;
 
     private ITicketService ticketService;
+    private ILoginService loginService;
 
     public ITicketService getTicketService() {
         return ticketService;
@@ -132,5 +151,47 @@ public class TicketResource extends CarnetDeBordUtils {
     @PUT
     @Consumes("application/json")
     public void putJson(String content) {
+    }
+
+    @POST
+    @Consumes("application/json")
+    public Response postJson(String content) {
+        Response.ResponseBuilder response = Response.ok();
+        if (content == null) {
+            response.status(Response.Status.BAD_REQUEST);
+            return response.build();
+        }
+
+        Ticket ticket = new Ticket();
+        long userID;
+        try {
+            JSONObject json = (JSONObject) new JSONParser().parse(content);
+            ticket.setTitle(StringEscapeUtils.escapeXml(json.get(PARAMETER_TITLE).toString().trim()));
+            ticket.setMessage(StringEscapeUtils.escapeXml(json.get(PARAMETER_MESSAGE).toString().trim()));
+            ticket.setType(StringEscapeUtils.escapeXml(json.get(PARAMETER_TYPE).toString()).trim());
+            ticket.setState(Boolean.valueOf(json.get(PARAMETER_STATE).toString()));
+            ticket.setAnnexInfo(StringEscapeUtils.escapeXml(json.get(PARAMETER_ANNEX_INFO).toString().trim()));
+            ticket.setRelevance(0);
+            ticket.setPostedDate(new Date());
+            userID = Long.valueOf(json.get(PARAMETER_USER_ID).toString());
+        } catch (ParseException e) {
+            logger.log(Level.WARNING, "Impossible to parse content in json object.", e);
+            response.status(Response.Status.INTERNAL_SERVER_ERROR);
+            return response.build();
+        }
+        
+        loginService = new LoginService();
+        User user = loginService.findUserById(userID);
+        if(user == null){
+            logger.log(Level.WARNING, "Impossible to find user information with id = {0}", userID);
+            response.status(Response.Status.BAD_REQUEST);
+            return response.build();
+        }
+        ticket.setUserFK(user);
+        
+        ticketService = new TicketService();
+        ticketService.saveTicket(ticket);
+        
+        return response.build();
     }
 }
