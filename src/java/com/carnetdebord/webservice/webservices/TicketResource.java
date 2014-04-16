@@ -41,32 +41,34 @@ import org.json.simple.parser.ParseException;
  */
 @Path("ticket")
 public class TicketResource extends CarnetDeBordUtils {
-
+    
     private static final Logger logger = Logger.getLogger(TicketResource.class.getName());
-
+    
     private static final String PATH_PARMAMETER_ID = "id";
     private static final String PATH_PARMAMETER_USER_ID = "userid";
     private static final String PATH_PARMAMETER_LONGITUDE = "longitude";
     private static final String PATH_PARMAMETER_LATITUDE = "latitude";
     
-    private static final String PARAMETER_TICKET_ID = "ticketid";
-    private static final String PARAMETER_USER_ID = "userid";
+    private static final String PARAMETER_TICKET_ID = "ticketID";
+    private static final String PARAMETER_USER_ID = "userID";
     private static final String PARAMETER_TITLE = "title";
     private static final String PARAMETER_MESSAGE = "message";
     private static final String PARAMETER_TYPE = "type";
-    private static final String PARAMETER_ANNEX_INFO = "annexinfo";
+    private static final String PARAMETER_ANNEX_INFO = "annexInfo";
     private static final String PARAMETER_STATE = "state";
-
+    private static final String PARAMETER_GEOLOCATION_ID = "geolocationID";
+    private static final String PARAMETER_ADDRESS = "address";
+    
     @Context
     private UriInfo context;
-
+    
     private ITicketService ticketService;
     private ILoginService loginService;
-
+    
     public ITicketService getTicketService() {
         return ticketService;
     }
-
+    
     public void setTicketService(ITicketService ticketService) {
         this.ticketService = ticketService;
     }
@@ -91,23 +93,23 @@ public class TicketResource extends CarnetDeBordUtils {
     public Response getJson(@PathParam(PATH_PARMAMETER_USER_ID) long userID, @PathParam(PATH_PARMAMETER_ID) long ticketID) {
         logger.info("request GET");
         logger.log(Level.INFO, "userID : {0} ,id : {1}", new Object[]{userID, ticketID});
-
+        
         Response.ResponseBuilder response = Response.ok();
         if (ticketID < 0 || userID < 0) {
             response.status(Response.Status.UNAUTHORIZED);
             return response.build();
         }
-
+        
         ticketService = new TicketService();
         Ticket ticket = ticketService.findUserTicket(userID, ticketID);
         if (ticket == null) {
             response.status(Response.Status.UNAUTHORIZED);
             return response.build();
         }
-
+        
         Json<Ticket> json = new Json<>();
         json.set(ticket);
-
+        
         response.entity(json.generateJson());
         return response.build();
     }
@@ -126,7 +128,7 @@ public class TicketResource extends CarnetDeBordUtils {
             @PathParam(PATH_PARMAMETER_LATITUDE) double latitude) {
         logger.info("request GET");
         logger.log(Level.INFO, "longitude : {0}, latitude : {1}", new Object[]{longitude, latitude});
-
+        
         Response.ResponseBuilder response = Response.ok();
         ticketService = new TicketService();
         List<Geolocation> geolocations = ticketService.getTicketsByGeolocation(longitude, latitude, true);
@@ -134,10 +136,10 @@ public class TicketResource extends CarnetDeBordUtils {
             response.status(Response.Status.NO_CONTENT);
             return response.build();
         }
-
+        
         Json<List<Geolocation>> json = new Json<>();
         json.set(geolocations);
-
+        
         response.entity(json.generateJson());
         return response.build();
     }
@@ -153,6 +155,13 @@ public class TicketResource extends CarnetDeBordUtils {
     public void putJson(String content) {
     }
 
+    /**
+     * <p>
+     * PUT request to save a ticket.</p>
+     *
+     * @param content
+     * @return
+     */
     @POST
     @Consumes("application/json")
     public Response postJson(String content) {
@@ -161,7 +170,8 @@ public class TicketResource extends CarnetDeBordUtils {
             response.status(Response.Status.BAD_REQUEST);
             return response.build();
         }
-
+        
+        Geolocation geolocation = new Geolocation();
         Ticket ticket = new Ticket();
         long userID;
         try {
@@ -173,6 +183,10 @@ public class TicketResource extends CarnetDeBordUtils {
             ticket.setAnnexInfo(StringEscapeUtils.escapeXml(json.get(PARAMETER_ANNEX_INFO).toString().trim()));
             ticket.setRelevance(0);
             ticket.setPostedDate(new Date());
+            geolocation.setTicketFK(ticket);
+            geolocation.setLatitude(Float.valueOf(json.get(PATH_PARMAMETER_LATITUDE).toString()));
+            geolocation.setLongitude(Float.valueOf(json.get(PATH_PARMAMETER_LONGITUDE).toString()));
+            geolocation.setAddress(StringEscapeUtils.escapeXml(json.get(PARAMETER_ADDRESS).toString()));
             userID = Long.valueOf(json.get(PARAMETER_USER_ID).toString());
         } catch (ParseException e) {
             logger.log(Level.WARNING, "Impossible to parse content in json object.", e);
@@ -182,7 +196,7 @@ public class TicketResource extends CarnetDeBordUtils {
         
         loginService = new LoginService();
         User user = loginService.findUserById(userID);
-        if(user == null){
+        if (user == null) {
             logger.log(Level.WARNING, "Impossible to find user information with id = {0}", userID);
             response.status(Response.Status.BAD_REQUEST);
             return response.build();
@@ -191,6 +205,7 @@ public class TicketResource extends CarnetDeBordUtils {
         
         ticketService = new TicketService();
         ticketService.saveTicket(ticket);
+        ticketService.saveTicketWithGeolocation(geolocation);
         
         return response.build();
     }

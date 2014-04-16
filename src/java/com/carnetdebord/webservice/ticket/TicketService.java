@@ -22,14 +22,14 @@ import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
  * @author Jean-Michel Lottier <jean-michel.lottier@cpe.fr>
  */
 public class TicketService extends CarnetDeBordUtils implements ITicketService {
-
+    
     public static final Logger logger = Logger.getLogger(TicketService.class.getName());
-
+    
     @EJB
     private TicketFacadeLocal ticketFacade;
     @EJB
     private GeolocationFacadeLocal geolocationFacade;
-
+    
     public TicketService() {
         try {
             this.ticketFacade = (TicketFacadeLocal) new InitialContext().lookup("java:module/TicketFacade");
@@ -49,7 +49,7 @@ public class TicketService extends CarnetDeBordUtils implements ITicketService {
         if (ticketID < 0) {
             return null;
         }
-
+        
         return ticketFacade.findTicketByID(ticketID);
     }
 
@@ -64,7 +64,7 @@ public class TicketService extends CarnetDeBordUtils implements ITicketService {
         if (userID < 0 || ticketID < 0) {
             return null;
         }
-
+        
         return ticketFacade.findTicketByID(userID, ticketID);
     }
 
@@ -82,7 +82,7 @@ public class TicketService extends CarnetDeBordUtils implements ITicketService {
         if (workingRadiuses.length > 0) {
             workingRadius = workingRadiuses[0];
         }
-
+        
         double radius = workingRadius.getRadType().equals(WorkingRadius.radiusType.RADIUS) ? workingRadius.getValue() : workingRadius.getValue() / 2;
         switch (workingRadius.getDistType()) {
             case CENTIMETER:
@@ -97,13 +97,22 @@ public class TicketService extends CarnetDeBordUtils implements ITicketService {
         List<Geolocation> geolocations = geolocationFacade.findGeolocationIntoWorkingRadius(latitude, longitude, radius, isAngularRadian);
         return geolocations;
     }
-
+    
     @Override
     public void saveTicket(Ticket ticket) {
-        if(ticket == null){
+        if (ticket == null) {
             return;
         }
         
         ticketFacade.create(ticket);
+    }
+    
+    @Override
+    public void saveTicketWithGeolocation(Geolocation geolocation) {
+        if (geolocation == null) {
+            return;
+        }
+        
+        geolocationFacade.create(geolocation);
     }
 }

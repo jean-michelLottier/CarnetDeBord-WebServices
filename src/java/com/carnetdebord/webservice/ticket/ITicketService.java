@@ -51,4 +51,12 @@ public interface ITicketService {
     public List<Geolocation> getTicketsByGeolocation(double longitude, double latitude, boolean isAngularRadian, WorkingRadius... workingRadiuses);
 
     public void saveTicket(Ticket ticket);
+
+    /**
+     * <p>
+     * Save ticket and its geolocation caracteristics</p>
+     *
+     * @param geolocation
+     */
+    public void saveTicketWithGeolocation(Geolocation geolocation);
 }
