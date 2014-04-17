@@ -95,7 +95,7 @@ public class CarnetDeBordUtils {
             json.put("ticketID", t.getId());
             json.put("annexInfo", t.getAnnexInfo());
             json.put("message", t.getMessage());
-            json.put("postedDate", t.getPostedDate());
+            json.put("postedDate", t.getPostedDate().toString());
             json.put("relevance", t.getRelevance());
             json.put("state", t.getState());
             json.put("title", t.getTitle());
@@ -129,8 +129,8 @@ public class CarnetDeBordUtils {
         private JSONObject fillJson(User user) {
             JSONObject json = new JSONObject();
             json.put("userID", user.getId());
-            json.put("birthDate", user.getBirthDate());
-            json.put("creationDate", user.getCreationDate());
+            json.put("birthDate", user.getBirthDate().toString());
+            json.put("creationDate", user.getCreationDate().toString());
             json.put("firstName", user.getFirstname());
             json.put("login", user.getLogin());
             json.put("name", user.getName());
