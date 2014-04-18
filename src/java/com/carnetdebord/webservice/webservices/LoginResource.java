@@ -99,7 +99,7 @@ public class LoginResource extends CarnetDeBordUtils {
         }
 
         try {
-            return Response.temporaryRedirect(new URI("../../../../confirmation-inscription.html")).build();
+            return Response.temporaryRedirect(new URI("http://serveur10.lerb.polymtl.ca:8080/CarnetDeBord/confirmation-inscription.html")).build();
         } catch (URISyntaxException e) {
             logger.log(Level.WARNING, "uri no available", e);
         }
@@ -173,8 +173,7 @@ public class LoginResource extends CarnetDeBordUtils {
         Json<User> json = new Json<>();
         json.set(user);
 
-        response.entity(json.generateJson());
-        return response.build();
+        return Response.ok(json.generateJson()).build();
     }
 
     /**
@@ -237,7 +236,6 @@ public class LoginResource extends CarnetDeBordUtils {
         emailService = new EmailService();
         emailService.sendConfirmationEmailWithGmail(token, user);
 
-        response.entity(j.generateJson());
-        return response.build();
+        return Response.ok(j.generateJson()).build();
     }
 }
