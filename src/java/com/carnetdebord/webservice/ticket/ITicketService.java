@@ -6,6 +6,7 @@
 package com.carnetdebord.webservice.ticket;
 
 import com.carnetdebord.webservice.entities.Geolocation;
+import com.carnetdebord.webservice.entities.Historical;
 import com.carnetdebord.webservice.entities.Ticket;
 import java.util.List;
 
@@ -59,4 +60,24 @@ public interface ITicketService {
      * @param geolocation
      */
     public void saveTicketWithGeolocation(Geolocation geolocation);
+
+    /**
+     * <p>
+     * Method permit return historical of tickets consulted by
+     * <strong>userID</strong> limited by <strong>limit</strong>.</p>
+     *
+     * @param userID
+     * @param limit
+     * @return recent list of tickets consulted otherwise null
+     */
+    public List<Ticket> getUserHistorical(long userID, long limit);
+
+    /**
+     * <p>
+     * Method called when user consults a foreign ticket to maintain a stack
+     * trace.</p>
+     *
+     * @param historical
+     */
+    public void addTicketConsultedIntoHistorical(Historical historical);
 }

@@ -30,6 +30,7 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(com.carnetdebord.webservice.webservices.HistoricalResource.class);
         resources.add(com.carnetdebord.webservice.webservices.LoginResource.class);
         resources.add(com.carnetdebord.webservice.webservices.TicketResource.class);
     }

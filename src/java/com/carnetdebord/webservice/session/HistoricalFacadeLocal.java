@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.carnetdebord.webservice.session;
 
 import com.carnetdebord.webservice.entities.Historical;
+import com.carnetdebord.webservice.entities.Ticket;
 import java.util.List;
 import javax.ejb.Local;
 
@@ -30,5 +30,8 @@ public interface HistoricalFacadeLocal {
     List<Historical> findRange(int[] range);
 
     int count();
-    
+
+    public List<Ticket> findUserTicketsConsulted(long userID, long limit);
+
+    public Historical findHistoricalByTicketIDAndUserID(long userID, long ticketID);
 }
