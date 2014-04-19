@@ -33,5 +33,7 @@ public interface HistoricalFacadeLocal {
 
     public List<Ticket> findUserTicketsConsulted(long userID, long limit);
 
+    public List<Historical> findHistoricalsByTicketID(long ticketID);
+
     public Historical findHistoricalByTicketIDAndUserID(long userID, long ticketID);
 }

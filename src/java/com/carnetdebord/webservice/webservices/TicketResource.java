@@ -6,6 +6,7 @@
 package com.carnetdebord.webservice.webservices;
 
 import com.carnetdebord.webservice.entities.Geolocation;
+import com.carnetdebord.webservice.entities.Historical;
 import com.carnetdebord.webservice.entities.Ticket;
 import com.carnetdebord.webservice.entities.User;
 import com.carnetdebord.webservice.login.ILoginService;
@@ -27,8 +28,10 @@ import com.carnetdebord.webservice.ticket.TicketService;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
 import static com.carnetdebord.webservice.webservices.LoginResource.logger;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import javax.ws.rs.POST;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -106,11 +109,30 @@ public class TicketResource extends CarnetDeBordUtils {
             response.status(Response.Status.UNAUTHORIZED);
             return response.build();
         }
-
         Json<Ticket> json = new Json<>();
         json.set(ticket);
 
-        return Response.ok(json.generateJson()).build();
+        List<Historical> historicals = ticketService.whoViewedTicket(ticketID);
+
+        LinkedHashMap jsonMap = new LinkedHashMap();
+        jsonMap.put("ticket", json.generateJson());
+        JSONArray jsona = new JSONArray();
+        if (historicals != null) {
+            for (Historical h : historicals) {
+                JSONObject jsono = new JSONObject();
+                jsono.put("userID", h.getUserFK().getId());
+                jsono.put("ticketID", h.getTicketFK().getId());
+                jsono.put("firstVisitedDate", h.getFirstVisitedDate().toString());
+                jsono.put("lastVisitedDate", h.getLastVisitedDate().toString());
+                jsona.add(jsono.toJSONString());
+            }
+        }
+        jsonMap.put("monitoring", jsona.toJSONString());
+
+        JSONObject jsono = new JSONObject();
+        jsono.putAll(jsonMap);
+
+        return Response.ok(jsono.toJSONString()).build();
     }
 
     /**

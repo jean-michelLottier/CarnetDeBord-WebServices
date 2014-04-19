@@ -13,8 +13,6 @@ import com.carnetdebord.webservice.ticket.TicketService;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -23,7 +21,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -50,6 +47,7 @@ public class HistoricalResource extends CarnetDeBordUtils {
     private ITicketService ticketService;
 
     private static final String PATH_PARAMETER_USER_ID = "userid";
+    private static final String PATH_PARAMETER_TICKET_ID = "ticketid";
     private static final String JSON_KEY_USER_ID = "userID";
     private static final String JSON_KEY_TICKET_ID = "ticketID";
     private static final String JSON_KEY_FIRST_VISITED_DATE = "firstVisitedDate";
@@ -92,6 +90,41 @@ public class HistoricalResource extends CarnetDeBordUtils {
     }
 
     /**
+     * <p>
+     * GET request to monitored tickets.</p>
+     *
+     * @param userID
+     * @param ticketID
+     * @return
+     */
+    @Path("/monitoring/{userid:(\\d+)}/ticketid/{ticketid:(\\d+)}")
+    @GET
+    @Consumes("application/json")
+    public Response getJson(@PathParam(PATH_PARAMETER_USER_ID) long userID, @PathParam(PATH_PARAMETER_TICKET_ID) long ticketID) {
+        logger.log(Level.INFO, "userid : {0}, ticketid : {1}", new Object[]{userID, ticketID});
+        ticketService = new TicketService();
+        Ticket ticket = ticketService.findUserTicket(userID, ticketID);
+        if (ticket == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        List<Historical> historicals = ticketService.whoViewedTicket(ticketID);
+        JSONArray jsona = new JSONArray();
+        if (historicals != null) {
+            for (Historical h : historicals) {
+                JSONObject json = new JSONObject();
+                json.put("userID", h.getUserFK().getId());
+                json.put("ticketID", h.getTicketFK().getId());
+                json.put("firstVisitedDate", h.getFirstVisitedDate().toString());
+                json.put("lastVisitedDate", h.getLastVisitedDate().toString());
+                jsona.add(json.toJSONString());
+            }
+        }
+
+        return Response.ok(jsona.toJSONString()).build();
+    }
+
+    /**
      * PUT method for updating or creating an instance of HistoricalResource
      *
      * @param content representation for the resource
@@ -122,7 +155,7 @@ public class HistoricalResource extends CarnetDeBordUtils {
 
         ticketService = new TicketService();
         ticketService.addTicketConsultedIntoHistorical(historical);
-        
+
         return response.build();
     }
 }

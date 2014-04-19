@@ -77,8 +77,29 @@ public class HistoricalFacade extends AbstractFacade<Historical> implements Hist
         } catch (NoResultException e) {
             historical = null;
         }
-        
+
         return historical;
+    }
+
+    @Override
+    public List<Historical> findHistoricalsByTicketID(long ticketID) {
+        if (ticketID < 0) {
+            return null;
+        }
+
+        Query query = em.createQuery("SELECT h"
+                + " FROM Historical h"
+                + " WHERE h.ticketFK.id = :ticketID")
+                .setParameter("ticketID", ticketID);
+
+        List<Historical> historicals;
+        try {
+            historicals = (List<Historical>) query.getResultList();
+        } catch (NoResultException e) {
+            historicals = null;
+        }
+
+        return historicals;
     }
 
 }

@@ -80,4 +80,14 @@ public interface ITicketService {
      * @param historical
      */
     public void addTicketConsultedIntoHistorical(Historical historical);
+
+    /**
+     * <p>
+     * This method permit to find all users who viewed the ticket whose id is
+     * <strong>ticketID</strong>.</p>
+     *
+     * @param ticketID
+     * @return list of historical object, otherwise null.
+     */
+    public List<Historical> whoViewedTicket(long ticketID);
 }

@@ -136,10 +136,18 @@ public class TicketService extends CarnetDeBordUtils implements ITicketService {
             return;
         }
 
-        if (historicalFacade.findHistoricalByTicketIDAndUserID(historical.getUserFK().getId()
-                , historical.getTicketFK().getId()) == null) {
+        if (historicalFacade.findHistoricalByTicketIDAndUserID(historical.getUserFK().getId(), historical.getTicketFK().getId()) == null) {
             historicalFacade.create(historical);
         }
 
+    }
+
+    @Override
+    public List<Historical> whoViewedTicket(long ticketID) {
+        if (ticketID < 0) {
+            return null;
+        }
+
+        return historicalFacade.findHistoricalsByTicketID(ticketID);
     }
 }
