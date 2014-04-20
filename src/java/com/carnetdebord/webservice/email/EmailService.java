@@ -34,7 +34,7 @@ public class EmailService implements IEmailService {
     private static final String EMAIL_SUBJECT_CONFIRMATION_INSCRIPTION = "Confirmation d'inscription";
     private static final String EMAIL_CONTENT_CONFIRMATION_INSCRIPTION = "<h1 style=\"color:blue;text-align:center;\">Horizon - Carnet de bord</h1>"
             + "<br/><p>Bienvenue sur <strong>Carnet de bord</strong> nouvel horizon!"
-            + "<br/>Vous pouvez vous connecter à votre compte une fois que vous l'aurez activé. Pour cela, veuillez activer celui-ci en cliquant sur le lien suivant : <a href=\"http://localhost:8080/CarnetDeBord/webresources/login/token/tokenid/\" style=\"color:blue;text-decoration:none;\">activer mon compte carnet de bord</a>."
+            + "<br/>Vous pouvez vous connecter à votre compte une fois que vous l'aurez activé. Pour cela, veuillez activer celui-ci en cliquant sur le lien suivant : <a href=\"http://serveur10.lerb.polymtl.ca:8080/CarnetDeBord/webresources/login/token/tokenid/\" style=\"color:blue;text-decoration:none;\">activer mon compte carnet de bord</a>."
             + "<br/><br/>Cordialement,</p>"
             + "<br/><br/><p>Votre équipe <strong>Horizon - Carnet de bord</strong></p>";
     
