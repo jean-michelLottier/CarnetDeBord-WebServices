@@ -13,6 +13,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
+import org.hibernate.Session;
 
 /**
  *
@@ -47,12 +48,13 @@ public class GeolocationFacade extends AbstractFacade<Geolocation> implements Ge
         double longMin = longitude - deltaLong;
         double longMax = longitude + deltaLong;
 
+        //acos(sin(:latitude) * sin(g.latitude) + cos(:latitude) * cos(g.latitude) * cos(g.longitude - (:longitude)))
         Query query = em.createQuery("SELECT g"
                 + " FROM Geolocation g"
                 + " WHERE g.ticketFK.state = 1"
-                + " AND g.Latitude BETWEEN :latMin AND :latMax"
-                + " AND g.Longitude BETWEEN :lonMin AND :longMax"
-                + " HAVING acos(sin(:latitude) * sin(g.Latitude) + cos(:latitude) * cos(g.Latitude) * cos(g.Longitude - (:longitude))) <= :r")
+                + " AND (g.latitude*3.141592653589793)/180 BETWEEN :latMin AND :latMax"
+                + " AND (g.longitude*3.141592653589793)/180 BETWEEN :longMin AND :longMax"
+                + " HAVING OPERATOR('Acos',OPERATOR('Sin',:latitude) * OPERATOR('Sin',(g.latitude*3.141592653589793)/180) + OPERATOR('Cos',:latitude) * OPERATOR('Cos',(g.latitude*3.141592653589793)/180) * OPERATOR('Cos',(g.longitude*3.141592653589793)/180 - (:longitude)))  <= :r")
                 .setParameter("latitude", latitude)
                 .setParameter("longitude", longitude)
                 .setParameter("latMin", latMin)

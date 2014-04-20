@@ -104,13 +104,23 @@ public class TicketResource extends CarnetDeBordUtils {
         }
 
         ticketService = new TicketService();
-        Ticket ticket = ticketService.findUserTicket(userID, ticketID);
+        Ticket ticket = ticketService.findTicketByID(ticketID);
         if (ticket == null) {
             response.status(Response.Status.UNAUTHORIZED);
             return response.build();
         }
         Json<Ticket> json = new Json<>();
         json.set(ticket);
+
+        if (ticket.getUserFK().getId() != userID) {
+            Historical historical = new Historical();
+            historical.setUserFK(new User((int) userID));
+            historical.setTicketFK(ticket);
+            Date date = new Date();
+            historical.setFirstVisitedDate(date);
+            historical.setLastVisitedDate(date);
+            ticketService.addTicketConsultedIntoHistorical(historical);
+        }
 
         List<Historical> historicals = ticketService.whoViewedTicket(ticketID);
 
@@ -142,7 +152,7 @@ public class TicketResource extends CarnetDeBordUtils {
      * @param latitude
      * @return
      */
-    @Path("/longitude/{longitude: [0-9.]+}/latitude/{latitude: [0-9.]+}")
+    @Path("/longitude/{longitude: [0-9.-]+}/latitude/{latitude: [0-9.-]+}")
     @GET
     @Produces("application/json")
     public Response getJson(@PathParam(PATH_PARMAMETER_LONGITUDE) double longitude,
@@ -152,7 +162,7 @@ public class TicketResource extends CarnetDeBordUtils {
 
         Response.ResponseBuilder response = Response.ok();
         ticketService = new TicketService();
-        List<Geolocation> geolocations = ticketService.getTicketsByGeolocation(longitude, latitude, true);
+        List<Geolocation> geolocations = ticketService.getTicketsByGeolocation(longitude, latitude, false);
         if (geolocations == null || geolocations.isEmpty()) {
             response.status(Response.Status.NO_CONTENT);
             return response.build();

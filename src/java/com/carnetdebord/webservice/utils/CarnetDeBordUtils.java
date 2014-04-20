@@ -59,11 +59,15 @@ public class CarnetDeBordUtils {
         private T data;
 
         public String generateJson() {
-            if (data instanceof ArrayList) {
-                ArrayList<Object> temp = (ArrayList<Object>) data;
+            logger.info("TEST1");
+            if (data instanceof List) {
+                logger.info("TEST2");
+                List<Object> temp = (List<Object>) data;
                 if (temp != null && !temp.isEmpty() && temp.get(0) instanceof Geolocation) {
+                    logger.info("TEST3");
                     List<JSONObject> jsonList = new ArrayList<>();
                     for (Object g : temp) {
+                        System.out.println(fillJson((Geolocation) g).toJSONString());
                         jsonList.add(fillJson((Geolocation) g));
                     }
                     return JSONValue.toJSONString(jsonList);
@@ -92,6 +96,7 @@ public class CarnetDeBordUtils {
 
         private JSONObject fillJson(Ticket t, boolean addGeolocInfo) {
             JSONObject json = new JSONObject();
+            json.put("userID", t.getUserFK().getId());
             json.put("ticketID", t.getId());
             json.put("annexInfo", t.getAnnexInfo());
             json.put("message", t.getMessage());
