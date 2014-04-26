@@ -59,12 +59,9 @@ public class CarnetDeBordUtils {
         private T data;
 
         public String generateJson() {
-            logger.info("TEST1");
             if (data instanceof List) {
-                logger.info("TEST2");
                 List<Object> temp = (List<Object>) data;
                 if (temp != null && !temp.isEmpty() && temp.get(0) instanceof Geolocation) {
-                    logger.info("TEST3");
                     List<JSONObject> jsonList = new ArrayList<>();
                     for (Object g : temp) {
                         System.out.println(fillJson((Geolocation) g).toJSONString());

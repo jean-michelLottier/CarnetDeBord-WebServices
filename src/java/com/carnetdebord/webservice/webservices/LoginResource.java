@@ -165,8 +165,10 @@ public class LoginResource extends CarnetDeBordUtils {
                 || connection.equals(codeConnection.ERROR_PASSWORD)
                 || connection.equals(codeConnection.ERROR_ACCOUNT_NOT_ACTIVATED)) {
             response.status(Response.Status.UNAUTHORIZED);
+            return response.build();
         } else if (connection.equals(codeConnection.ERROR_EMPTY_FIELD)) {
             response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE);
+            return response.build();
         }
 
         User user = loginService.getUserInformation(login);
