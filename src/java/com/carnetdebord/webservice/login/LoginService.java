@@ -7,7 +7,6 @@ package com.carnetdebord.webservice.login;
 
 import com.carnetdebord.webservice.email.EmailService;
 import com.carnetdebord.webservice.email.IEmailService;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.carnetdebord.webservice.entities.User;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -28,6 +27,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import com.carnetdebord.webservice.session.UserFacadeLocal;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -147,7 +147,7 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
             logger.log(Level.SEVERE, "Bad encoding", e);
             newPassword = sb.toString();
         }
-        logger.log(Level.INFO, "new password : {0}", newPassword);
+
         user.setPassword(newPassword);
 
         logger.info("Edit user");
@@ -156,7 +156,7 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         logger.info("Send email");
         emailService = new EmailService();
         emailService.sendForgotPassordEmailWithGmail(user, sb.toString());
-        
+
         return codeConnection.SUCCESS;
     }
 
@@ -174,7 +174,7 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
     }
 
     private byte[] encryptContent(String content) {
-        content = Base64.encode(content.getBytes());
+        content = Base64.encodeBase64String(content.getBytes());
 
 //        KeyGenerator kg;
 //        try {
@@ -190,7 +190,7 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
             logger.log(Level.SEVERE, "Impossible to load file 'utils.properties'.", e);
         }
         String strKey = properties.getProperty("keyAES");
-        SecretKey key = new SecretKeySpec(Base64.decode(strKey), "AES");
+        SecretKey key = new SecretKeySpec(Base64.decodeBase64(strKey), "AES");
 
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -214,6 +214,11 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
         return null;
     }
 
+    @Override
+    public String decryptPassword(byte[] content) {
+        return new String(decryptContent(content));
+    }
+
     private byte[] decryptContent(byte[] content) {
         Properties properties = new Properties();
         try {
@@ -222,14 +227,14 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
             logger.log(Level.SEVERE, "Impossible to load file 'utils.properties'.", e);
         }
         String strKey = properties.getProperty("keyAES");
-        SecretKey key = new SecretKeySpec(Base64.decode(strKey), "AES");
+        SecretKey key = new SecretKeySpec(Base64.decodeBase64(strKey), "AES");
 
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, key);
 
             content = cipher.doFinal(content);
-            content = Base64.decode(new String(content, "UTF8"));
+            content = Base64.decodeBase64(new String(content, "UTF8"));
 
             return content;
         } catch (NoSuchPaddingException e) {
@@ -251,10 +256,10 @@ public class LoginService extends CarnetDeBordUtils implements ILoginService {
 
     @Override
     public User findUserById(long id) {
-        if(id < 0){
+        if (id < 0) {
             return null;
         }
-        
+
         return userFacade.findUserByID(id);
     }
 }
