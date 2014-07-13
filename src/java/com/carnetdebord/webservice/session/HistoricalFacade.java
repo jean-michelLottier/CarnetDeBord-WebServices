@@ -71,7 +71,7 @@ public class HistoricalFacade extends AbstractFacade<Historical> implements Hist
                 .setParameter("userID", userID)
                 .setParameter("ticketID", ticketID);
 
-        Historical historical = new Historical();
+        Historical historical;
         try {
             historical = (Historical) query.getSingleResult();
         } catch (NoResultException e) {

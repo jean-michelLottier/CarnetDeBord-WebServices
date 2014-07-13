@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.carnetdebord.webservice.session;
 
 import com.carnetdebord.webservice.entities.Email;
@@ -17,6 +16,7 @@ import javax.persistence.PersistenceContext;
  */
 @Stateless
 public class EmailFacade extends AbstractFacade<Email> implements EmailFacadeLocal {
+
     @PersistenceContext(unitName = "CarnetDeBordPU")
     private EntityManager em;
 
@@ -28,5 +28,5 @@ public class EmailFacade extends AbstractFacade<Email> implements EmailFacadeLoc
     public EmailFacade() {
         super(Email.class);
     }
-    
+
 }

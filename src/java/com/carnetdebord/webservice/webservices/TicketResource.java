@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response;
 import com.carnetdebord.webservice.ticket.ITicketService;
 import com.carnetdebord.webservice.ticket.TicketService;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
-import static com.carnetdebord.webservice.webservices.LoginResource.logger;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import javax.ws.rs.POST;
@@ -47,20 +46,10 @@ public class TicketResource extends CarnetDeBordUtils {
 
     private static final Logger logger = Logger.getLogger(TicketResource.class.getName());
 
-    private static final String PATH_PARMAMETER_ID = "id";
+    private static final String PATH_PARMAMETER_TICKET_ID = "ticketid";
     private static final String PATH_PARMAMETER_USER_ID = "userid";
     private static final String PATH_PARMAMETER_LONGITUDE = "longitude";
     private static final String PATH_PARMAMETER_LATITUDE = "latitude";
-
-    private static final String PARAMETER_TICKET_ID = "ticketID";
-    private static final String PARAMETER_USER_ID = "userID";
-    private static final String PARAMETER_TITLE = "title";
-    private static final String PARAMETER_MESSAGE = "message";
-    private static final String PARAMETER_TYPE = "type";
-    private static final String PARAMETER_ANNEX_INFO = "annexInfo";
-    private static final String PARAMETER_STATE = "state";
-    private static final String PARAMETER_GEOLOCATION_ID = "geolocationID";
-    private static final String PARAMETER_ADDRESS = "address";
 
     @Context
     private UriInfo context;
@@ -90,10 +79,10 @@ public class TicketResource extends CarnetDeBordUtils {
      * @param ticketID
      * @return an instance of java.lang.String
      */
-    @Path("/{userid:(\\d+)}/id/{id: (\\d+)}")
+    @Path("/{userid:(\\d+)}/ticketid/{ticketid: (\\d+)}")
     @GET
     @Produces("application/json")
-    public Response getJson(@PathParam(PATH_PARMAMETER_USER_ID) long userID, @PathParam(PATH_PARMAMETER_ID) long ticketID) {
+    public Response getJson(@PathParam(PATH_PARMAMETER_USER_ID) long userID, @PathParam(PATH_PARMAMETER_TICKET_ID) long ticketID) {
         logger.info("request GET");
         logger.log(Level.INFO, "userID : {0} ,id : {1}", new Object[]{userID, ticketID});
 
@@ -130,10 +119,10 @@ public class TicketResource extends CarnetDeBordUtils {
         if (historicals != null) {
             for (Historical h : historicals) {
                 JSONObject jsono = new JSONObject();
-                jsono.put("userID", h.getUserFK().getId());
-                jsono.put("ticketID", h.getTicketFK().getId());
-                jsono.put("firstVisitedDate", h.getFirstVisitedDate().toString());
-                jsono.put("lastVisitedDate", h.getLastVisitedDate().toString());
+                jsono.put(USER_ID, h.getUserFK().getId());
+                jsono.put(TICKET_ID, h.getTicketFK().getId());
+                jsono.put(FIRST_VISITED_DATE, h.getFirstVisitedDate().toString());
+                jsono.put(LAST_VISITED_DATE, h.getLastVisitedDate().toString());
                 jsona.add(jsono.toJSONString());
             }
         }
@@ -206,18 +195,18 @@ public class TicketResource extends CarnetDeBordUtils {
         long userID;
         try {
             JSONObject json = (JSONObject) new JSONParser().parse(content);
-            ticket.setTitle(StringEscapeUtils.escapeXml(json.get(PARAMETER_TITLE).toString().trim()));
-            ticket.setMessage(StringEscapeUtils.escapeXml(json.get(PARAMETER_MESSAGE).toString().trim()));
-            ticket.setType(StringEscapeUtils.escapeXml(json.get(PARAMETER_TYPE).toString()).trim());
-            ticket.setState(Boolean.valueOf(json.get(PARAMETER_STATE).toString()));
-            ticket.setAnnexInfo(StringEscapeUtils.escapeXml(json.get(PARAMETER_ANNEX_INFO).toString().trim()));
+            ticket.setTitle(StringEscapeUtils.escapeXml(json.get(TITLE).toString().trim()));
+            ticket.setMessage(StringEscapeUtils.escapeXml(json.get(MESSAGE).toString().trim()));
+            ticket.setType(StringEscapeUtils.escapeXml(json.get(TYPE).toString()).trim());
+            ticket.setState(Boolean.valueOf(json.get(STATE).toString()));
+            ticket.setAnnexInfo(StringEscapeUtils.escapeXml(json.get(ANNEX_INFO).toString().trim()));
             ticket.setRelevance(0);
             ticket.setPostedDate(new Date());
             geolocation.setTicketFK(ticket);
-            geolocation.setLatitude(Float.valueOf(json.get(PATH_PARMAMETER_LATITUDE).toString()));
-            geolocation.setLongitude(Float.valueOf(json.get(PATH_PARMAMETER_LONGITUDE).toString()));
-            geolocation.setAddress(StringEscapeUtils.escapeXml(json.get(PARAMETER_ADDRESS).toString()));
-            userID = Long.valueOf(json.get(PARAMETER_USER_ID).toString());
+            geolocation.setLatitude(Float.valueOf(json.get(LATITUDE).toString()));
+            geolocation.setLongitude(Float.valueOf(json.get(LONGITUDE).toString()));
+            geolocation.setAddress(StringEscapeUtils.escapeXml(json.get(ADDRESS).toString()));
+            userID = Long.valueOf(json.get(USER_ID).toString());
         } catch (ParseException e) {
             logger.log(Level.WARNING, "Impossible to parse content in json object.", e);
             response.status(Response.Status.INTERNAL_SERVER_ERROR);

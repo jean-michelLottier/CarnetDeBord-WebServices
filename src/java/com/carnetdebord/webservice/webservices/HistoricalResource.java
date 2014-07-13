@@ -48,9 +48,6 @@ public class HistoricalResource extends CarnetDeBordUtils {
 
     private static final String PATH_PARAMETER_USER_ID = "userid";
     private static final String PATH_PARAMETER_TICKET_ID = "ticketid";
-    private static final String JSON_KEY_USER_ID = "userID";
-    private static final String JSON_KEY_TICKET_ID = "ticketID";
-    private static final String JSON_KEY_FIRST_VISITED_DATE = "firstVisitedDate";
 
     /**
      * Creates a new instance of HistoricalResource
@@ -113,10 +110,10 @@ public class HistoricalResource extends CarnetDeBordUtils {
         if (historicals != null) {
             for (Historical h : historicals) {
                 JSONObject json = new JSONObject();
-                json.put("userID", h.getUserFK().getId());
-                json.put("ticketID", h.getTicketFK().getId());
-                json.put("firstVisitedDate", h.getFirstVisitedDate().toString());
-                json.put("lastVisitedDate", h.getLastVisitedDate().toString());
+                json.put(USER_ID, h.getUserFK().getId());
+                json.put(TICKET_ID, h.getTicketFK().getId());
+                json.put(FIRST_VISITED_DATE, h.getFirstVisitedDate().toString());
+                json.put(LAST_VISITED_DATE, h.getLastVisitedDate().toString());
                 jsona.add(json.toJSONString());
             }
         }
@@ -141,10 +138,10 @@ public class HistoricalResource extends CarnetDeBordUtils {
         Historical historical = new Historical();
         try {
             JSONObject json = (JSONObject) new JSONParser().parse(content);
-            historical.setUserFK(new User(Integer.valueOf(json.get(JSON_KEY_USER_ID).toString())));
-            historical.setTicketFK(new Ticket(Integer.valueOf(json.get(JSON_KEY_TICKET_ID).toString())));
+            historical.setUserFK(new User(Integer.valueOf(json.get(USER_ID).toString())));
+            historical.setTicketFK(new Ticket(Integer.valueOf(json.get(TICKET_ID).toString())));
             DateFormat format = new SimpleDateFormat("EEE MMM dd kk:mm:ss z yyyy", Locale.ENGLISH);
-            String date = json.get(JSON_KEY_FIRST_VISITED_DATE).toString();
+            String date = json.get(FIRST_VISITED_DATE).toString();
             historical.setFirstVisitedDate(format.parse(date));
             historical.setLastVisitedDate(format.parse(date));
         } catch (ParseException | java.text.ParseException ex) {

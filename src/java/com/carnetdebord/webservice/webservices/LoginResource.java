@@ -28,11 +28,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import javax.ws.rs.PathParam;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * REST Web Service
@@ -43,11 +43,6 @@ import javax.ws.rs.PathParam;
 public class LoginResource extends CarnetDeBordUtils {
 
     public static final Logger logger = Logger.getLogger(LoginResource.class.getName());
-    private static final String PARAMETER_LOGIN = "login";
-    private static final String PARAMETER_PASSWORD = "password";
-    private static final String PARAMETER_NAME = "name";
-    private static final String PARAMETER_FIRSTNAME = "firstname";
-    private static final String PARAMETER_BIRTHDATE = "birthdate";
     private static final String PATH_PARAMETER_TOKEN_ID = "tokenid";
 
     @Context
@@ -89,7 +84,7 @@ public class LoginResource extends CarnetDeBordUtils {
             return response.build();
         }
 
-        tokenID = new String(Base64.decode(tokenID), Charset.defaultCharset());
+        tokenID = new String(Base64.decodeBase64(tokenID), Charset.defaultCharset());
         loginService = new LoginService();
         codeConnection connection = loginService.activateAccount(tokenID);
 
@@ -117,7 +112,7 @@ public class LoginResource extends CarnetDeBordUtils {
     @Path("/{login: ([a-zA-Z0-9.-]+)(@)([a-z]+)(\\.)([a-z]{2,3})}")
     @GET
     @Produces("application/json")
-    public Response getJson2(@PathParam(PARAMETER_LOGIN) String login) {
+    public Response getJson2(@PathParam(LOGIN) String login) {
         Response.ResponseBuilder response = Response.ok();
 
         logger.log(Level.INFO, "login : {0}", login);
@@ -150,8 +145,9 @@ public class LoginResource extends CarnetDeBordUtils {
         String login, password;
         try {
             JSONObject json = (JSONObject) new JSONParser().parse(content);
-            login = StringEscapeUtils.escapeXml(json.get(PARAMETER_LOGIN).toString());
-            password = StringEscapeUtils.escapeXml(json.get(PARAMETER_PASSWORD).toString());
+            login = StringEscapeUtils.escapeXml(json.get(LOGIN).toString());
+//            password = StringEscapeUtils.escapeXml(json.get(PARAMETER_PASSWORD).toString());
+            password = json.get(PASSWORD).toString();
         } catch (ParseException e) {
             logger.log(Level.WARNING, "Impossible to parse content in json object.", e);
             response.status(Response.Status.INTERNAL_SERVER_ERROR);
@@ -198,11 +194,12 @@ public class LoginResource extends CarnetDeBordUtils {
         User user = new User();
         try {
             JSONObject json = (JSONObject) new JSONParser().parse(content);
-            user.setLogin(StringEscapeUtils.escapeXml(json.get(PARAMETER_LOGIN).toString()));
-            user.setPassword(StringEscapeUtils.escapeXml(json.get(PARAMETER_PASSWORD).toString()));
-            user.setName(StringEscapeUtils.escapeXml(json.get(PARAMETER_NAME).toString()));
-            user.setFirstname(StringEscapeUtils.escapeXml(json.get(PARAMETER_FIRSTNAME).toString()));
-            String birthDateStr = json.get(PARAMETER_BIRTHDATE).toString();
+            user.setLogin(StringEscapeUtils.escapeXml(json.get(LOGIN).toString()));
+//            user.setPassword(StringEscapeUtils.escapeXml(json.get(PARAMETER_PASSWORD).toString()));
+            user.setPassword(json.get(PASSWORD).toString());
+            user.setName(StringEscapeUtils.escapeXml(json.get(NAME).toString()));
+            user.setFirstname(StringEscapeUtils.escapeXml(json.get(FIRST_NAME).toString()));
+            String birthDateStr = json.get(BIRTH_DATE).toString();
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Canada/Atlantic"));
             user.setCreationDate(calendar.getTime());
             calendar.set(Integer.valueOf(birthDateStr.split("/")[0]), Integer.valueOf(birthDateStr.split("/")[1]) - 1, Integer.valueOf(birthDateStr.split("/")[2]) + 1, 0, 0, 0);
@@ -234,7 +231,7 @@ public class LoginResource extends CarnetDeBordUtils {
         Json<User> j = new Json<>();
         j.set(user);
 
-        String token = Base64.encode(user.getLogin().getBytes(Charset.defaultCharset()));
+        String token = Base64.encodeBase64String(user.getLogin().getBytes(Charset.defaultCharset()));
         emailService = new EmailService();
         emailService.sendConfirmationEmailWithGmail(token, user);
 

@@ -13,7 +13,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import com.carnetdebord.webservice.utils.CarnetDeBordUtils;
-import org.hibernate.Session;
 
 /**
  *
@@ -48,7 +47,6 @@ public class GeolocationFacade extends AbstractFacade<Geolocation> implements Ge
         double longMin = longitude - deltaLong;
         double longMax = longitude + deltaLong;
 
-        //acos(sin(:latitude) * sin(g.latitude) + cos(:latitude) * cos(g.latitude) * cos(g.longitude - (:longitude)))
         Query query = em.createQuery("SELECT g"
                 + " FROM Geolocation g"
                 + " WHERE g.ticketFK.state = 1"

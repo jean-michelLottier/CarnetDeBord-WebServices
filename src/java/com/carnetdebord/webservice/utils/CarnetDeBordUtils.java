@@ -26,6 +26,28 @@ public class CarnetDeBordUtils {
     public static final int KILOMETER_IN_METER = 1000;
     public static final int KILOMETER_IN_CENTIMETER = 100000;
 
+    public static final String ADDRESS = "address";
+    public static final String ANNEX_INFO = "annexInfo";
+    public static final String BIRTH_DATE = "birthDate";
+    public static final String CREATION_DATE = "creationDate";
+    public static final String FIRST_NAME = "firstName";
+    public static final String FIRST_VISITED_DATE = "firstVisitedDate";
+    public static final String GEOLOCATION_ID = "geolocationID";
+    public static final String LAST_VISITED_DATE = "lastVisitedDate";
+    public static final String LATITUDE = "latitude";
+    public static final String LOGIN = "login";
+    public static final String LONGITUDE = "longitude";
+    public static final String MESSAGE = "message";
+    public static final String NAME = "name";
+    public static final String PASSWORD = "password";
+    public static final String POSTED_DATE = "postedDate";
+    public static final String RELEVANCE = "relevance";
+    public static final String STATE = "state";
+    public static final String TICKET_ID = "ticketID";
+    public static final String TITLE = "title";
+    public static final String TYPE = "type";
+    public static final String USER_ID = "userID";
+
     public static enum codeConnection {
 
         ERROR_LOGIN, ERROR_PASSWORD, ERROR_EMPTY_FIELD, SUCCESS, ERROR_REGISTER, ERROR_ACCOUNT_ALREADY_EXIST, ERROR_ACCOUNT_NOT_ACTIVATED;
@@ -93,21 +115,21 @@ public class CarnetDeBordUtils {
 
         private JSONObject fillJson(Ticket t, boolean addGeolocInfo) {
             JSONObject json = new JSONObject();
-            json.put("userID", t.getUserFK().getId());
-            json.put("ticketID", t.getId());
-            json.put("annexInfo", t.getAnnexInfo());
-            json.put("message", t.getMessage());
-            json.put("postedDate", t.getPostedDate().toString());
-            json.put("relevance", t.getRelevance());
-            json.put("state", t.getState());
-            json.put("title", t.getTitle());
-            json.put("type", t.getType());
+            json.put(USER_ID, t.getUserFK().getId());
+            json.put(TICKET_ID, t.getId());
+            json.put(ANNEX_INFO, t.getAnnexInfo());
+            json.put(MESSAGE, t.getMessage());
+            json.put(POSTED_DATE, t.getPostedDate().toString());
+            json.put(RELEVANCE, t.getRelevance());
+            json.put(STATE, t.getState());
+            json.put(TITLE, t.getTitle());
+            json.put(TYPE, t.getType());
             if (addGeolocInfo) {
                 for (Geolocation g : t.getGeolocationCollection()) {
-                    json.put("geolocationID", g.getId());
-                    json.put("latitude", g.getLatitude());
-                    json.put("longitude", g.getLongitude());
-                    json.put("address", g.getAddress());
+                    json.put(GEOLOCATION_ID, g.getId());
+                    json.put(LATITUDE, g.getLatitude());
+                    json.put(LONGITUDE, g.getLongitude());
+                    json.put(ADDRESS, g.getAddress());
                     break;
                 }
             }
@@ -117,26 +139,26 @@ public class CarnetDeBordUtils {
 
         private JSONObject fillJson(Geolocation geolocation) {
             JSONObject json = new JSONObject();
-            json.put("geolocationID", geolocation.getId());
-            json.put("latitude", geolocation.getLatitude());
-            json.put("longitude", geolocation.getLongitude());
-            json.put("address", geolocation.getAddress());
+            json.put(GEOLOCATION_ID, geolocation.getId());
+            json.put(LATITUDE, geolocation.getLatitude());
+            json.put(LONGITUDE, geolocation.getLongitude());
+            json.put(ADDRESS, geolocation.getAddress());
             json.putAll(fillJson(geolocation.getTicketFK(), false));
-            json.put("name", geolocation.getTicketFK().getUserFK().getName());
-            json.put("firstname", geolocation.getTicketFK().getUserFK().getFirstname());
+            json.put(NAME, geolocation.getTicketFK().getUserFK().getName());
+            json.put(FIRST_NAME, geolocation.getTicketFK().getUserFK().getFirstname());
 
             return json;
         }
 
         private JSONObject fillJson(User user) {
             JSONObject json = new JSONObject();
-            json.put("userID", user.getId());
-            json.put("birthDate", user.getBirthDate().toString());
-            json.put("creationDate", user.getCreationDate().toString());
-            json.put("firstName", user.getFirstname());
-            json.put("login", user.getLogin());
-            json.put("name", user.getName());
-            json.put("password", user.getPassword());
+            json.put(USER_ID, user.getId());
+            json.put(BIRTH_DATE, user.getBirthDate().toString());
+            json.put(CREATION_DATE, user.getCreationDate().toString());
+            json.put(FIRST_NAME, user.getFirstname());
+            json.put(LOGIN, user.getLogin());
+            json.put(NAME, user.getName());
+            json.put(PASSWORD, user.getPassword());
 
             return json;
         }
